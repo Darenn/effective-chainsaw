@@ -14,6 +14,13 @@
 #undef NDEBUG
 #include <assert.h>
 
+// Macros for assertions
+#define ASSERT_IN_RANGE(value, min, max)                                       \
+  {                                                                            \
+    assert(value >= min);                                                      \
+    assert(value <= max);                                                      \
+  }
+
 // Pre-declaration to be able to declare operator <<
 template <class Element> class Heap;
 
@@ -60,7 +67,9 @@ private:
    * node \c pos_2 ).
    */
   bool lt(unsigned int const pos_1, unsigned int const pos_2) const {
-    return true;
+    ASSERT_IN_RANGE(pos_1, 0, capacity - 1);
+    ASSERT_IN_RANGE(pos_2, 0, capacity - 1);
+    return elements[pos_1] < elements[pos_2];
   }
 
   /*! To compare two elements (less or equal).
@@ -70,7 +79,9 @@ private:
    * \return true iff the node at \c pos_1 has a value LESSER than or EQUAL to
    * the one at node \c pos_2 ) */
   bool le(unsigned int const pos_1, unsigned int const pos_2) const {
-    return true;
+    ASSERT_IN_RANGE(pos_1, 0, capacity - 1);
+    ASSERT_IN_RANGE(pos_2, 0, capacity - 1);
+    return elements[pos_1] <= elements[pos_2];
   }
 
   /*!
@@ -81,7 +92,12 @@ private:
    * \return the index (in the array) of the left son of the node (indicated by
    * index i).
    */
-  unsigned int get_pos_left_son(unsigned int i) const { return -1; };
+  unsigned int get_pos_left_son(unsigned int i) const {
+    ASSERT_IN_RANGE(i, 0, capacity - 1);
+    unsigned int pos_left_son = 2 * i + 1;
+    // ASSERT_IN_RANGE(pos_left_son, 0, capacity - 1);
+    return pos_left_son;
+  };
 
   /*!
    * To compute the index of the left son.
@@ -91,7 +107,12 @@ private:
    * \return the index (in the array) of the right son of the node (indicated by
    * index i).
    */
-  unsigned int get_pos_right_son(const unsigned int i) const { return -1; };
+  unsigned int get_pos_right_son(const unsigned int i) const {
+    ASSERT_IN_RANGE(i, 0, capacity - 1);
+    unsigned int pos_right_son = 2 * i + 2;
+    // ASSERT_IN_RANGE(pos_right_son, 0, capacity - 1);
+    return pos_right_son;
+  };
 
   /*!
    * To compute the index of the father.
@@ -101,7 +122,17 @@ private:
    * \return the index (in the array) of the right son of the node (indicated by
    * index i), except for the root (it returns 0).
    */
-  unsigned int get_pos_father(const unsigned int i) const { return -1; };
+  unsigned int get_pos_father(const unsigned int i) const {
+    ASSERT_IN_RANGE(i, 0, capacity - 1);
+    unsigned int pos_father;
+    if (i == 0) {
+      pos_father = 0;
+    } else {
+      pos_father = (i - 1) * 0.5;
+    }
+    ASSERT_IN_RANGE(pos_father, 0, capacity - 1);
+    return pos_father;
+  };
 
   /*!
    * Exchange two elements in the array.
@@ -110,7 +141,13 @@ private:
    * \param i position of the node.
    * \pre \c pos_a and \c pos_b are legal positions.
    */
-  void swap(const unsigned int pos_a, const unsigned int pos_b) {}
+  void swap(const unsigned int pos_a, const unsigned int pos_b) {
+    ASSERT_IN_RANGE(pos_a, 0, capacity - 1);
+    ASSERT_IN_RANGE(pos_b, 0, capacity - 1);
+    Element *buffer = elements[pos_a];
+    elements[pos_a] = elements[pos_b];
+    elements[pos_b] = buffer;
+  }
 
   /*!
    * To check the validity of the heap.
@@ -194,16 +231,75 @@ public:
 // => METHODS MUST BE HERE
 //
 
-template <class Element> bool Heap<Element>::is_valid() const { return false; }
+template <class Element> bool Heap<Element>::is_valid() const {
+  for (size_t i = 0; i < nb_elem; i++) {
+    if (get_pos_right_son(i) < nb_elem) {
+      if (!le(i, get_pos_right_son(i))) {
+        return false;
+      }
+    }
+    if (get_pos_left_son(i) < nb_elem) {
+      if (!le(i, get_pos_left_son(i))) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
-template <class Element> void Heap<Element>::lower(unsigned int pos) {}
+template <class Element> void Heap<Element>::lower(unsigned int pos) {
+  ASSERT_IN_RANGE(pos, 0, capacity - 1);
+  unsigned int pos_left_son = get_pos_left_son(pos);
+  unsigned int pos_right_son = get_pos_right_son(pos);
+  // While the node has children, and the node is lesser than one of its
+  // children, swap with the lesser child
+  while ((pos_left_son < nb_elem && lt(pos, pos_left_son)) ||
+         (pos_right_son < nb_elem && lt(pos, pos_right_son))) {
+    unsigned pos_to_swap_with;
+    if (pos_left_son < nb_elem && le(pos_left_son, pos_right_son)) {
+      pos_to_swap_with = pos_left_son;
+    } else {
+      pos_to_swap_with = pos_right_son;
+    }
+    swap(pos, pos_to_swap_with);
+    // Reset positions for next iteration
+    pos = pos_to_swap_with;
+    pos_left_son = get_pos_left_son(pos);
+    pos_right_son = get_pos_left_son(pos);
+  }
+  assert(is_valid());
+}
 
-template <class Element> void Heap<Element>::push(Element &v) {}
+template <class Element> void Heap<Element>::push(Element &v) {
+  assert(is_valid());
+  assert(nb_elem < capacity);
+  elements[nb_elem] = &v;
+  nb_elem++;
+  raise(nb_elem - 1);
+  assert(is_valid());
+}
 
-template <class Element> void Heap<Element>::raise(unsigned int pos) {}
+template <class Element> void Heap<Element>::raise(unsigned int pos) {
+  ASSERT_IN_RANGE(pos, 0, capacity - 1);
+  unsigned int pos_father = get_pos_father(pos);
+  // While the node has a father and is lesser than it, swap the node
+  // with its father.
+  while (pos_father > 0 && lt(pos, pos_father)) {
+    swap(pos, pos_father);
+    pos = pos_father;
+  }
+  assert(is_valid());
+}
 
 template <class Element> Element &Heap<Element>::pop() {
-  return *(Element *)NULL;
+  assert(is_valid());
+  Element &popped_element = *elements[0];
+  elements[0] = elements[nb_elem - 1];
+  elements[nb_elem - 1] = NULL;
+  nb_elem--;
+  lower(0);
+  assert(is_valid());
+  return popped_element;
 }
 
 /*! Print the heap on the \c ostream as an array with the format:
@@ -214,6 +310,15 @@ template <class Element> Element &Heap<Element>::pop() {
  */
 template <class Element>
 std::ostream &operator<<(std::ostream &out, Heap<Element> const &h) {
+  out << '[';
+  for (size_t i = 0; i < h.nb_elem; i++) {
+    if (i == h.nb_elem - 1) {
+      out << ' ' << *h.elements[i] << ' ';
+    } else {
+      out << ' ' << *h.elements[i] << " ,";
+    }
+  }
+  out << ']';
   return out;
 }
 
