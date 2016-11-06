@@ -1,0 +1,18 @@
+[ -235 , -172 , -136 , -68 , 3 , 50 , 11 , 62 , 7 , 121 , 8 , 69 , 129 , 235 , 23 , 115 , 62 , 127 , 67 , 182 , 259 , 8 , 199 , 286 , 272 , 237 , 170 , 240 , 242 , 230 , 43 , 249 , 192 , 293 , 126 , 223 , 136 , 226 , 177 , 267 , 286 , 283 , 263 , 235 , 72 , 290 ]
+removing -235
+adding -5
+[ -172 , -68 , -136 , 7 , -5 , 50 , 11 , 62 , 67 , 121 , 3 , 69 , 129 , 235 , 23 , 115 , 62 , 127 , 177 , 182 , 259 , 8 , 8 , 286 , 272 , 237 , 170 , 240 , 242 , 230 , 43 , 249 , 192 , 293 , 126 , 223 , 136 , 226 , 290 , 267 , 286 , 283 , 263 , 235 , 72 , 199 ]
+removing -172
+adding 43
+[ -136 , -68 , 11 , 7 , -5 , 50 , 23 , 62 , 67 , 121 , 3 , 69 , 129 , 235 , 43 , 115 , 62 , 127 , 177 , 182 , 259 , 8 , 8 , 286 , 272 , 237 , 170 , 240 , 242 , 230 , 199 , 249 , 192 , 293 , 126 , 223 , 136 , 226 , 290 , 267 , 286 , 283 , 263 , 235 , 72 , 43 ]
+Sorted output
+-136 -68 -5 3 7 8 8 11 23 43 43 50 62 62 67 69 72 115 121 126 127 129 136 170 177 182 192 199 223 226 230 235 235 237 240 242 249 259 263 267 272 283 286 286 290 293 
+[ (C) , ./test_heap , -h , Copyright , 2002-2013, , GNU , ./test_heap , Seward , Using , Valgrind-3.10.1 , LibVEX; , GPL'd, , Memcheck, , Julian , Command: , valgrind , et , al. , a , memory , and , and , rerun , with , error , for , copyright , info , detector , by ]
+removing (C)
+adding Afd
+[ -h , ./test_heap , ./test_heap , Copyright , 2002-2013, , GNU , Afd , Seward , Using , Valgrind-3.10.1 , LibVEX; , GPL'd, , Memcheck, , Julian , Command: , valgrind , et , al. , a , memory , and , and , rerun , with , error , for , copyright , info , detector , by ]
+removing -h
+adding Asf
+[ ./test_heap , 2002-2013, , ./test_heap , Copyright , LibVEX; , GNU , Afd , Seward , Using , Valgrind-3.10.1 , and , GPL'd, , Memcheck, , Julian , Asf , valgrind , et , al. , a , memory , and , by , rerun , with , error , for , copyright , info , detector , Command: ]
+Sorted output
+./test_heap ./test_heap 2002-2013, Afd Asf Command: Copyright GNU GPL'd, Julian LibVEX; Memcheck, Seward Using Valgrind-3.10.1 a al. and and by copyright detector error et for info memory rerun valgrind with 
