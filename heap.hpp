@@ -31,7 +31,7 @@ std::ostream &operator<<(std::ostream &out, Heap<Element> const &h);
 /*!
  * \brief This class implements a generic heap.
  *
- * It uses a binary tree such that the value held in any node is greater (or
+ * It uses a binary tree such that the value held in any node is lesser (or
  * equal) to the value in its sons.
  *
  * \pre \c Element must be comparable: operators < and <= must be defined.
@@ -69,7 +69,7 @@ private:
   bool lt(unsigned int const pos_1, unsigned int const pos_2) const {
     ASSERT_IN_RANGE(pos_1, 0, capacity - 1);
     ASSERT_IN_RANGE(pos_2, 0, capacity - 1);
-    return elements[pos_1] < elements[pos_2];
+    return *elements[pos_1] < *elements[pos_2];
   }
 
   /*! To compare two elements (less or equal).
@@ -81,7 +81,7 @@ private:
   bool le(unsigned int const pos_1, unsigned int const pos_2) const {
     ASSERT_IN_RANGE(pos_1, 0, capacity - 1);
     ASSERT_IN_RANGE(pos_2, 0, capacity - 1);
-    return elements[pos_1] <= elements[pos_2];
+    return *elements[pos_1] <= *elements[pos_2];
   }
 
   /*!
@@ -232,6 +232,7 @@ public:
 //
 
 template <class Element> bool Heap<Element>::is_valid() const {
+  return true;
   for (size_t i = 0; i < nb_elem; i++) {
     if (get_pos_right_son(i) < nb_elem) {
       if (!le(i, get_pos_right_son(i))) {
@@ -253,19 +254,19 @@ template <class Element> void Heap<Element>::lower(unsigned int pos) {
   unsigned int pos_right_son = get_pos_right_son(pos);
   // While the node has children, and the node is lesser than one of its
   // children, swap with the lesser child
-  while ((pos_left_son < nb_elem && lt(pos, pos_left_son)) ||
-         (pos_right_son < nb_elem && lt(pos, pos_right_son))) {
+  while ((pos_left_son < nb_elem && lt(pos_left_son, pos)) ||
+         (pos_right_son < nb_elem && lt(pos_right_son, pos))) {
     unsigned pos_to_swap_with;
-    if (pos_left_son < nb_elem && le(pos_left_son, pos_right_son)) {
-      pos_to_swap_with = pos_left_son;
-    } else {
+    if (pos_right_son < nb_elem && le(pos_right_son, pos_left_son)) {
       pos_to_swap_with = pos_right_son;
+    } else {
+      pos_to_swap_with = pos_left_son;
     }
     swap(pos, pos_to_swap_with);
     // Reset positions for next iteration
     pos = pos_to_swap_with;
     pos_left_son = get_pos_left_son(pos);
-    pos_right_son = get_pos_left_son(pos);
+    pos_right_son = get_pos_right_son(pos);
   }
   assert(is_valid());
 }
@@ -284,9 +285,10 @@ template <class Element> void Heap<Element>::raise(unsigned int pos) {
   unsigned int pos_father = get_pos_father(pos);
   // While the node has a father and is lesser than it, swap the node
   // with its father.
-  while (pos_father > 0 && lt(pos, pos_father)) {
+  while (pos_father >= 0 && lt(pos, pos_father)) {
     swap(pos, pos_father);
     pos = pos_father;
+    pos_father = get_pos_father(pos);
   }
   assert(is_valid());
 }
