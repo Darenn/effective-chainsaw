@@ -95,7 +95,6 @@ private:
   unsigned int get_pos_left_son(unsigned int i) const {
     ASSERT_IN_RANGE(i, 0, capacity - 1);
     unsigned int pos_left_son = 2 * i + 1;
-    // ASSERT_IN_RANGE(pos_left_son, 0, capacity - 1);
     return pos_left_son;
   };
 
@@ -110,7 +109,6 @@ private:
   unsigned int get_pos_right_son(const unsigned int i) const {
     ASSERT_IN_RANGE(i, 0, capacity - 1);
     unsigned int pos_right_son = 2 * i + 2;
-    // ASSERT_IN_RANGE(pos_right_son, 0, capacity - 1);
     return pos_right_son;
   };
 
