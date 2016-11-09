@@ -230,7 +230,6 @@ public:
 //
 
 template <class Element> bool Heap<Element>::is_valid() const {
-  return true;
   for (size_t i = 0; i < nb_elem; i++) {
     if (get_pos_right_son(i) < nb_elem) {
       if (!le(i, get_pos_right_son(i))) {
@@ -255,7 +254,7 @@ template <class Element> void Heap<Element>::lower(unsigned int pos) {
   while ((pos_left_son < nb_elem && lt(pos_left_son, pos)) ||
          (pos_right_son < nb_elem && lt(pos_right_son, pos))) {
     unsigned pos_to_swap_with;
-    if (pos_right_son < nb_elem && le(pos_right_son, pos_left_son)) {
+    if (pos_right_son < nb_elem && lt(pos_right_son, pos_left_son)) {
       pos_to_swap_with = pos_right_son;
     } else {
       pos_to_swap_with = pos_left_son;
