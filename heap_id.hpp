@@ -359,7 +359,6 @@ template <class Element> Element &Heap_Id<Element>::pop() {
 template <class Element>
 void Heap_Id<Element>::reposition(const unsigned int id) {
   assert(id >= 0);
-  assert(id < nb_elem);
   int pos = id_to_pos[id];
   if (lt(pos, get_pos_father(pos))) {
     raise(pos);
