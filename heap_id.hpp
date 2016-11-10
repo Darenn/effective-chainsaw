@@ -88,7 +88,7 @@ private:
   bool lt(unsigned int const pos_1, unsigned int const pos_2) const {
     ASSERT_IN_RANGE(pos_1, 0, capacity - 1);
     ASSERT_IN_RANGE(pos_2, 0, capacity - 1);
-    return *elements[pos_1] < *elements[pos_2];
+    return (*(elements[pos_1]).first) < (*(elements[pos_2]).first);
   }
 
   /*! To compare two elements (less or equal).
@@ -100,7 +100,7 @@ private:
   bool le(unsigned int const pos_1, unsigned int const pos_2) const {
     ASSERT_IN_RANGE(pos_1, 0, capacity - 1);
     ASSERT_IN_RANGE(pos_2, 0, capacity - 1);
-    return *elements[pos_1] <= *elements[pos_2];
+    return (*(elements[pos_1]).first) <= (*(elements[pos_2]).first);
   }
 
   /*!
@@ -162,9 +162,9 @@ private:
     ASSERT_IN_RANGE(pos_a, 0, capacity - 1);
     ASSERT_IN_RANGE(pos_b, 0, capacity - 1);
     const unsigned int temp_pos_a = pos_a;
-    id_to_pos[(*elements[pos_a]).second] = pos_b;
-    id_to_pos[(*elements[pos_a]).second] = temp_pos_a;
-    Element *buffer = elements[pos_a];
+    id_to_pos[(elements[pos_a]).second] = pos_b;
+    id_to_pos[(elements[pos_b]).second] = temp_pos_a;
+    Node buffer = elements[pos_a];
     elements[pos_a] = elements[pos_b];
     elements[pos_b] = buffer;
   }
@@ -202,14 +202,23 @@ public:
   Heap_Id(unsigned int _capacity)
       : capacity(_capacity), elements(new Node[_capacity]), nb_elem(0),
         id_to_pos(new unsigned int[_capacity]),
-        id_free(new unsigned int[_capacity]){};
+        id_free(new unsigned int[_capacity]) {
+    // Fill the id free with ids
+    for (size_t i = 0; i < capacity; i++) {
+      id_free[i] = i;
+    }
+  };
 
   //
   //  DESTRUCTOR
   //
 
   /*! Release the arrays. */
-  ~Heap_Id() {}
+  ~Heap_Id() {
+    delete[] elements;
+    delete[] id_to_pos;
+    delete[] id_free;
+  }
 
   //
   //  PUBLIC METHODS
@@ -219,7 +228,7 @@ public:
    * To test the emptyness of the heap.
    * \return true iff the Heap_Id  is empty
    */
-  bool is_empty() const { return true; }
+  bool is_empty() const { return nb_elem == 0; }
 
   /*!
    * Remove and return the root of the heap.
@@ -258,23 +267,90 @@ public:
 //
 
 template <class Element> bool Heap_Id<Element>::is_valid() const {
-  return false;
+  return true;
+  for (size_t i = 0; i < nb_elem; i++) {
+    if (get_pos_right_son(i) < nb_elem) {
+      if (!le(i, get_pos_right_son(i))) {
+        return false;
+      }
+    }
+    if (get_pos_left_son(i) < nb_elem) {
+      if (!le(i, get_pos_left_son(i))) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
-template <class Element> void Heap_Id<Element>::lower(unsigned int pos) {}
+template <class Element> void Heap_Id<Element>::lower(unsigned int pos) {
+  ASSERT_IN_RANGE(pos, 0, capacity - 1);
+  unsigned int pos_left_son = get_pos_left_son(pos);
+  unsigned int pos_right_son = get_pos_right_son(pos);
+  // While the node has children, and the node is lesser than one of its
+  // children, swap with the lesser child
+  while ((pos_left_son < nb_elem && lt(pos_left_son, pos)) ||
+         (pos_right_son < nb_elem && lt(pos_right_son, pos))) {
+    unsigned pos_to_swap_with;
+    if (pos_right_son < nb_elem && lt(pos_right_son, pos_left_son)) {
+      pos_to_swap_with = pos_right_son;
+    } else {
+      pos_to_swap_with = pos_left_son;
+    }
+    swap(pos, pos_to_swap_with);
+    // Reset positions for next iteration
+    pos = pos_to_swap_with;
+    pos_left_son = get_pos_left_son(pos);
+    pos_right_son = get_pos_right_son(pos);
+  }
+  assert(is_valid());
+}
 
 template <class Element> unsigned int Heap_Id<Element>::push(Element &v) {
-  return -1;
+  assert(is_valid());
+  assert(nb_elem < capacity);
+  std::pair<Element *, unsigned int> *pair =
+      new std::pair<Element *, unsigned int>(&v, id_free[nb_elem]);
+  Node n = *pair;
+  elements[nb_elem] = n;
+  id_to_pos[n.second] = nb_elem;
+  nb_elem++;
+  raise(nb_elem - 1);
+  assert(is_valid());
+  return n.second;
 }
 
-template <class Element> void Heap_Id<Element>::raise(unsigned int pos) {}
+template <class Element> void Heap_Id<Element>::raise(unsigned int pos) {
+  ASSERT_IN_RANGE(pos, 0, capacity - 1);
+  unsigned int pos_father = get_pos_father(pos);
+  // While the node has a father and is lesser than it, swap the node
+  // with its father.
+  while (pos_father >= 0 && lt(pos, pos_father)) {
+    swap(pos, pos_father);
+    pos = pos_father;
+    pos_father = get_pos_father(pos);
+  }
+  assert(is_valid());
+}
 
 template <class Element> Element &Heap_Id<Element>::pop() {
-  return *(Element *)NULL;
+  assert(is_valid());
+  swap(0, nb_elem - 1);
+  Node *popped_node = &elements[nb_elem - 1];
+  Element *popped_element = popped_node->first;
+  // elements[nb_elem - 1] = NULL;
+  nb_elem--;
+  lower(0);
+  assert(is_valid());
+  // delete (popped_node);
+  return *popped_element;
 }
 
 template <class Element>
-void Heap_Id<Element>::reposition(const unsigned int id) {}
+void Heap_Id<Element>::reposition(const unsigned int id) {
+  raise(id_to_pos[id]);
+  lower(id_to_pos[id]);
+}
 
 /*! Print the heap on the \c ostream as an array with the format:
  * \verbatim [ e0 , e1 , ... , en ] \endverbatim
@@ -284,6 +360,15 @@ void Heap_Id<Element>::reposition(const unsigned int id) {}
  */
 template <class Element>
 std::ostream &operator<<(std::ostream &out, Heap_Id<Element> const &h) {
+  out << '[';
+  for (size_t i = 0; i < h.nb_elem; i++) {
+    if (i == h.nb_elem - 1) {
+      out << ' ' << *((h.elements[i]).first) << ' ';
+    } else {
+      out << ' ' << *((h.elements[i]).first) << " ,";
+    }
+  }
+  out << ']';
   return out;
 }
 
