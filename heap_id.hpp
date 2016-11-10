@@ -309,10 +309,8 @@ template <class Element> void Heap_Id<Element>::lower(unsigned int pos) {
 template <class Element> unsigned int Heap_Id<Element>::push(Element &v) {
   assert(is_valid());
   assert(nb_elem < capacity);
-  std::pair<Element *, unsigned int> *pair =
-      new std::pair<Element *, unsigned int>(&v, id_free[nb_elem]);
-  Node n = *pair;
-  elements[nb_elem] = n;
+  elements[nb_elem] = std::pair<Element *, unsigned int>(&v, id_free[nb_elem]);
+  Node n = elements[nb_elem];
   id_to_pos[n.second] = nb_elem;
   nb_elem++;
   raise(nb_elem - 1);
@@ -338,11 +336,9 @@ template <class Element> Element &Heap_Id<Element>::pop() {
   swap(0, nb_elem - 1);
   Node *popped_node = &elements[nb_elem - 1];
   Element *popped_element = popped_node->first;
-  // elements[nb_elem - 1] = NULL;
   nb_elem--;
   lower(0);
   assert(is_valid());
-  // delete (popped_node);
   return *popped_element;
 }
 
