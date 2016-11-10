@@ -1,7 +1,7 @@
-# ifndef __GRAPH_HPP_
-# define __GRAPH_HPP_
+#ifndef __GRAPH_HPP_
+#define __GRAPH_HPP_
 
-/*! 
+/*!
  * \file
  * \brief This module provide a simple implantation of undirected graph.
  *
@@ -9,19 +9,15 @@
  * \date 2016
  */
 
+#include <sstream>
 
-# include <sstream>
+#include <utility> // pair
+#include <vector>
 
-# include <utility> // pair
-# include <vector>
+#undef NDEBUG
+#include <assert.h>
 
-
-# undef NDEBUG
-# include <assert.h>
-
-
-
-/*! 
+/*!
  * \brief To encode an undirected graph.
  *
  * A graph is created with a given number of vertices and no edge.
@@ -31,37 +27,29 @@
  */
 class Graph {
 
-public :
-
+public:
   /*!
    * Type to store edges:
    * \li other extremity, and
    * \li length.
    */
-  typedef std :: pair < unsigned int ,
-			float > Edge ;
-
-  /*! 
+  typedef std::pair<unsigned int, float> Edge;
+  typedef std::vector<Edge> VEdge;
+  /*!
    * Type to store vertices:
    * \li String to name it,
    * \li Vector to store the edges going out of it.
    */
-  typedef std :: pair < std :: string ,
-			std :: vector < Edge > >  Vertex ;
+  typedef std::pair<std::string, VEdge> Vertex;
 
   /* Number of vertices. */
-  unsigned int const nbr_vertices ;
+  unsigned int const nbr_vertices;
 
-  
-private :
-
+private:
   /*! Array to store the vertices. */
-  Vertex * const vertices ;
+  Vertex *const vertices;
 
-  
-public :
-
-  
+public:
   //
   //  CONSTRUCTOR
   //
@@ -72,31 +60,26 @@ public :
    * \param _nbr_vertices number of vertices.
    * The graph has no edges.
    */
-  Graph ( unsigned int _nbr_vertices )
-    : nbr_vertices ( _nbr_vertices )
-    , vertices ( new Vertex [ _nbr_vertices ] )
-  {
-    std :: string prefix ( "n" ) ;
-    for ( unsigned int i = 0 ;
-	  i < nbr_vertices ;
-	  i ++ ) {
+  Graph(unsigned int _nbr_vertices)
+      : nbr_vertices(_nbr_vertices), vertices(new Vertex[_nbr_vertices]) {
+    std::string prefix("n");
+    for (unsigned int i = 0; i < nbr_vertices; i++) {
       // "magic formula" for to_string ()
-      vertices [ i ] . first = prefix + static_cast < std :: ostringstream * > ( & ( std :: ostringstream () << i ) ) -> str() ;
+      vertices[i].first =
+          prefix +
+          static_cast<std::ostringstream *>(&(std::ostringstream() << i))
+              ->str();
       // still looking for better (and yet not C++11)
     }
   }
 
-  
   //
   //  DESTRUCTOR
   //
 
   /*! Release the resources. */
-  ~Graph () { 
-    delete[] vertices ;
-  }
+  ~Graph() { delete[] vertices; }
 
-  
   //
   //  PUBLIC METHODS
   //
@@ -108,14 +91,12 @@ public :
    * \pre \c i and \c j are legal vertex number.
    * \pre \c len is strictly positive.
    */
-  void add_edge ( unsigned int i ,
-		  unsigned int j ,
-		  float len ) {
-    assert ( i < nbr_vertices ) ;
-    assert ( j < nbr_vertices ) ;
-    assert ( 0 < len ) ;
-    vertices  [ i ] . second . push_back ( Edge ( j , len ) ) ;
-    vertices  [ j ] . second . push_back ( Edge ( i , len ) ) ;
+  void add_edge(unsigned int i, unsigned int j, float len) {
+    assert(i < nbr_vertices);
+    assert(j < nbr_vertices);
+    assert(0 < len);
+    vertices[i].second.push_back(Edge(j, len));
+    vertices[j].second.push_back(Edge(i, len));
   }
 
   /*!
@@ -130,9 +111,7 @@ public :
    * \param i,j endpoints of the path to search.
    * \pre \c i and \c j are legal vertex number.
    */
-  void print_dijkstra ( unsigned int i ,
-			unsigned int j ) const ;
+  void print_dijkstra(unsigned int i, unsigned int j) const;
+};
 
-} ;
-
-# endif
+#endif
