@@ -240,7 +240,10 @@ public:
    */
   Element &pop();
 
-  // TODO
+  /*!
+   * \brief Reposition the value with this id in the heap.
+   * \pre The id is valid.
+   */
   void reposition(const unsigned int id);
 
   /*!
@@ -355,6 +358,8 @@ template <class Element> Element &Heap_Id<Element>::pop() {
 
 template <class Element>
 void Heap_Id<Element>::reposition(const unsigned int id) {
+  assert(id >= 0);
+  assert(id < nb_elem);
   int pos = id_to_pos[id];
   if (lt(pos, get_pos_father(pos))) {
     raise(pos);
