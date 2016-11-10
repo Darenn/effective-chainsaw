@@ -27,3 +27,6 @@
 *.exe
 *.out
 *.app
+test_graph
+test_heap
+test_heap_id
