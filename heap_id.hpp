@@ -267,18 +267,28 @@ public:
 //
 
 template <class Element> bool Heap_Id<Element>::is_valid() const {
-  return true;
   for (size_t i = 0; i < nb_elem; i++) {
     if (get_pos_right_son(i) < nb_elem) {
-      if (!le(i, get_pos_right_son(i))) {
-        return false;
-      }
+      assert(le(i, get_pos_right_son(i)));
     }
     if (get_pos_left_son(i) < nb_elem) {
-      if (!le(i, get_pos_left_son(i))) {
-        return false;
+      assert(le(i, get_pos_left_son(i)));
+    }
+
+    // Check that the pos set for ids in id_to_pos is good
+    unsigned int id = elements[i].second;
+    unsigned int pos = i;
+    assert(pos == id_to_pos[id]);
+
+    // Check that this id is not free
+    bool isFree = false;
+    for (size_t j = nb_elem; j < capacity; j++) {
+      if (id_free[j] == id) {
+        isFree = true;
+        break;
       }
     }
+    assert(!isFree);
   }
   return true;
 }
@@ -337,6 +347,7 @@ template <class Element> Element &Heap_Id<Element>::pop() {
   Node *popped_node = &elements[nb_elem - 1];
   Element *popped_element = popped_node->first;
   nb_elem--;
+  id_free[nb_elem] = popped_node->second;
   lower(0);
   assert(is_valid());
   return *popped_element;
@@ -344,8 +355,12 @@ template <class Element> Element &Heap_Id<Element>::pop() {
 
 template <class Element>
 void Heap_Id<Element>::reposition(const unsigned int id) {
-  raise(id_to_pos[id]);
-  lower(id_to_pos[id]);
+  int pos = id_to_pos[id];
+  if (lt(pos, get_pos_father(pos))) {
+    raise(pos);
+  } else {
+    lower(pos);
+  }
 }
 
 /*! Print the heap on the \c ostream as an array with the format:
